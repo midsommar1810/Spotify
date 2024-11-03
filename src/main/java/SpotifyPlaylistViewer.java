@@ -2,17 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public class SpotifyPlaylistViewer {
 
-    private static final String CLIENT_ID = "0cdb670e82a943e6b810c5ccd2cf8b9f"; // Replace with your Spotify Client ID
-    private static final String CLIENT_SECRET = "4f6e8d8f791a43049c0efa7b5cf6057b"; // Replace with your Spotify Client Secret
-    private static String accessToken;
+
+    public static SpotifyFetch ss = new SpotifyFetch() ;
+
 
     public static void main(String[] args) {
         // Set up the main frame
@@ -59,10 +54,10 @@ public class SpotifyPlaylistViewer {
             public void actionPerformed(ActionEvent e) {
                 String playlistUrl = urlField.getText().trim();
                 try {
-                    if (authenticateSpotify()) {
+                    if (ss.authenticateSpotify()) {
                         String playlistId = extractPlaylistId(playlistUrl);
                         if (playlistId != null) {
-                            String trackNames = fetchPlaylistTracks(playlistId);
+                            String trackNames = SpotifyFetch.fetchPlaylistTracks(playlistId);
                             trackDisplay.setText(trackNames);
                             statusLabel.setText("Status: Playlist loaded successfully.");
                         } else {
@@ -84,21 +79,6 @@ public class SpotifyPlaylistViewer {
         frame.setVisible(true);
     }
 
-    private static boolean authenticateSpotify() throws Exception {
-        HttpResponse<String> response = Unirest.post("https://accounts.spotify.com/api/token")
-                .header("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((CLIENT_ID + ":" + CLIENT_SECRET).getBytes()))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .field("grant_type", "client_credentials")
-                .asString();
-
-        if (response.getStatus() == 200) {
-            JsonObject json = JsonParser.parseString(response.getBody()).getAsJsonObject();
-            accessToken = json.get("access_token").getAsString();
-            return true;
-        }
-        return false;
-    }
-
     private static String extractPlaylistId(String playlistUrl) {
         try {
             String[] parts = playlistUrl.split("/");
@@ -109,23 +89,4 @@ public class SpotifyPlaylistViewer {
         }
     }
 
-    private static String fetchPlaylistTracks(String playlistId) throws Exception {
-        HttpResponse<String> response = Unirest.get("https://api.spotify.com/v1/playlists/" + playlistId + "/tracks")
-                .header("Authorization", "Bearer " + accessToken)
-                .asString();
-
-        if (response.getStatus() == 200) {
-            JsonObject json = JsonParser.parseString(response.getBody()).getAsJsonObject();
-            JsonArray items = json.getAsJsonArray("items");
-            StringBuilder trackNames = new StringBuilder();
-            for (int i = 0; i < items.size(); i++) {
-                JsonObject track = items.get(i).getAsJsonObject().getAsJsonObject("track");
-                String trackName = track.get("name").getAsString();
-                trackNames.append((i + 1) + ". " + trackName + "\n");
-            }
-            return trackNames.toString();
-        } else {
-            return "Failed to retrieve tracks.";
-        }
-    }
 }
