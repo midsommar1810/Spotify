@@ -51,6 +51,7 @@ public class YouTubePlaylistCreator {
             String videoId2 = searchYouTubeVideo2(track);
             if (videoId2 != null) {
                 addToYouTubePlaylist(playlistId, videoId2);
+                Thread.sleep(1000);
             }
         }
     }

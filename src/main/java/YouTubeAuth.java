@@ -15,7 +15,7 @@ import java.util.List;
 
 public class YouTubeAuth {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final List<String> SCOPES = List.of("https://www.googleapis.com/auth/youtube");
+    private static final List<String> SCOPES = List.of("https://www.googleapis.com/auth/youtube" , "https://www.googleapis.com/auth/youtube.force-ssl");
     private static final String APPLICATION_NAME = "SpotifyToYouTube";
 
     public static YouTube authenticate(String clientSecretPath) throws GeneralSecurityException, IOException {
